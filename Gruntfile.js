@@ -31,14 +31,13 @@ module.exports = function(grunt) {
     uglify: {
       my_target: {
         files: {
-          'public/dist/built.min.js': ['public/dist/built.js'],
-          'public/dist/style.min.css': ['public/dist/style.css']
+          'public/dist/built.min.js': ['public/dist/built.js']
         }
       }
     },
 
     jshint: {
-      files: [ 'public/client/*.js', 'public/*.css' ],
+      files: [ 'public/client/*.js' ],
       options: {
         force: 'true',
         jshintrc: '.jshintrc',
@@ -50,6 +49,11 @@ module.exports = function(grunt) {
     },
 
     cssmin: {
+      target: {
+        files: {
+          'public/dist/style.min.css': ['public/style.css']
+        }
+      }
     },
 
     watch: {
@@ -113,7 +117,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('deploy', [ 'jshint', 'concat', 'uglify', 'jshint' ]);
+  grunt.registerTask('deploy', [ 'jshint', 'concat', 'uglify', 'cssmin', 'jshint' ]);
 
   // grunt.registerTask('default', [
   //   // insert default tasks here
