@@ -39,6 +39,14 @@ db.once('open', function (callback) {
       console.log(data);
     }
   });
+
+  var test = function() {
+    console.log('this is a test');
+  };
+  // createNewUser = function(username, password) {
+    //
+
+
 });
 
 module.exports = db;
