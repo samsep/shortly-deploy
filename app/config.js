@@ -5,8 +5,10 @@ var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/shortlyDB');
 var db = mongoose.connection;
 
+db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
-  var Url = mongoose.Schema({
+
+  var urlSchema = mongoose.Schema({
     'url': String,
     'base_url': String,
     'code': String,
@@ -14,14 +16,29 @@ db.once('open', function (callback) {
     'visits': Number
   });
 
-  var User = mongoose.Schema({
+  var userSchema = mongoose.Schema({
     'username': String,
     'password': String
   });
 
-  // var User = mongoose.model('User', users);
-  // var Url = mongoose.model('Url', urls);
+  var User = mongoose.model('User', userSchema);
+  var Url = mongoose.model('Url', urlSchema);
   var user = new User({username:'devin', password:'devin'});
+  var url = new Url({url: 'http://www.google.com'});
+  url.save(function(err, data) {
+    if (err) {
+      console.log('error occurred', err);
+    } else {
+      console.log(data);
+    }
+  });
+  user.save(function(err, data) {
+    if (err) {
+      console.log('error occurred', err);
+    } else {
+      console.log(data);
+    }
+  });
 });
 
 module.exports = db;
