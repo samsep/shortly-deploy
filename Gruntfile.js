@@ -8,8 +8,8 @@ module.exports = function(grunt) {
       separator: ';',
       },
       dist: {
-        src: ['public/client/*.js', 'public/lib/*.js'],
-        dest: 'public/dist/built.js'
+        src: ['public/client/**/*.js'],
+        dest: 'public/dist/<%= pkg.name %>.js'
       }
     },
 
@@ -29,29 +29,42 @@ module.exports = function(grunt) {
     },
 
     uglify: {
-      my_target: {
+      options: {
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("dd-mm-yyyy") %> */\n'
+      },
+      dist: {
         files: {
-          'public/dist/built.min.js': ['public/dist/built.js']
+          'public/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
         }
       }
     },
 
     jshint: {
-      files: [ 'public/client/*.js' ],
+      files: [
+        'Gruntfile.js',
+        'app/**/*.js',
+        'public/**/*.js',
+        'lib/**/*.js',
+        './*.js',
+        'spec/**/*.js'
+       ],
       options: {
         force: 'true',
         jshintrc: '.jshintrc',
         ignores: [
-          'public/lib/**/*.js'
-          // 'public/dist/**/*.js'
+          'public/lib/**/*.js',
+          'public/dist/**/*.js'
         ]
       }
     },
 
     cssmin: {
-      target: {
+       options: {
+        keepSpecialComments: 0
+      },
+      dist: {
         files: {
-          'public/dist/style.min.css': ['public/style.css']
+          'public/dist/style.min.css': 'public/style.css'
         }
       }
     },
@@ -75,6 +88,12 @@ module.exports = function(grunt) {
 
     shell: {
       prodServer: {
+        command: 'git push azure master',
+        options: {
+          stdout: true,
+          stderr: true,
+          failOnError: true
+        }
       }
     }
   });
@@ -91,9 +110,9 @@ module.exports = function(grunt) {
   grunt.registerTask('server-dev', function (target) {
     // Running nodejs in a different process and displaying output on the main console
     var nodemon = grunt.util.spawn({
-         cmd: 'grunt',
-         grunt: true,
-         args: 'nodemon'
+        cmd: 'grunt',
+        grunt: true,
+        args: 'nodemon'
     });
     nodemon.stdout.pipe(process.stdout);
     nodemon.stderr.pipe(process.stderr);
@@ -106,21 +125,28 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
+    'jshint',
     'mochaTest'
+  ]);
+
+  grunt.registerTask('build', [
+    'concat',
+    'uglify',
+    'cssmin'
   ]);
 
   grunt.registerTask('upload', function(n) {
     if(grunt.option('prod')) {
-      // add your production server task here
+      grunt.task.run([ 'shell:prodServer' ]);
     } else {
       grunt.task.run([ 'server-dev' ]);
     }
   });
 
-  grunt.registerTask('deploy', [ 'jshint', 'concat', 'uglify', 'cssmin', 'jshint' ]);
+  grunt.registerTask('deploy', [
+    'test',
+    'build',
+    'upload'
+  ]);
 
-  // grunt.registerTask('default', [
-  //   // insert default tasks here
-  // ]);
-
-}
+};
